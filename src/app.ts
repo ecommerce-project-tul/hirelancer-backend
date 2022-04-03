@@ -3,6 +3,8 @@ import dotenv from 'dotenv'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
+import UserController from './controller/UserController'
+import appDataSource from './database/init'
 
 dotenv.config();
 const app = express()
@@ -16,9 +18,14 @@ app.use(express.urlencoded({extended: false}))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.get("/", (req, res) => {
-    res.send("xddd!");
-})
+app.use("/", new UserController().router);
+
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, ()=> console.log(`Server is listening on PORT - ${PORT}`))
+appDataSource.initialize()
+.then(() => {
+    app.listen(PORT, ()=> console.log(`Server is listening on PORT - ${PORT}`))
+})
+.catch((error) => {
+    console.log(error)
+})
