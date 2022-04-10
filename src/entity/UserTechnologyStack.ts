@@ -8,11 +8,11 @@ export class UserTechnologyStack {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @ManyToOne(() => User, user => user.technologyStacks )
+    @ManyToOne(() => User, user => user.userTechnologyStacks )
     @JoinColumn({name: "user_id"})
     user: User
 
-    @ManyToOne(()=> TechnologyStack, technologyStack => technologyStack.id)
+    @ManyToOne(()=> TechnologyStack, technologyStack => technologyStack.userTechnologyStacks)
     @JoinColumn({name: "technology_stack_id"})
     technologyStack: TechnologyStack;
 
@@ -22,8 +22,6 @@ export class UserTechnologyStack {
 
     // @Column({type: "uuid", name: "technology_stack_id"})
     // technologyStackId: string;
-
-
 
     @Column("int")
     score: number;

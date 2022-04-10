@@ -1,6 +1,5 @@
-import { Column, Entity,  OneToMany,  PrimaryGeneratedColumn } from "typeorm";
-import { AnnouncementTag } from "./AnnouncementTag";
-
+import { Column, Entity,  ManyToMany,  PrimaryGeneratedColumn } from "typeorm";
+import { Announcement } from "./Announcement";
 
 @Entity("tags")
 export class Tag {
@@ -9,4 +8,7 @@ export class Tag {
 
     @Column("varchar")
     name: string;
+
+    @ManyToMany(() => Announcement, announcement => announcement.tags)
+    announcements: Announcement[]; 
 }
