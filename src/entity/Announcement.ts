@@ -2,7 +2,6 @@ import { Column, Entity,  JoinColumn,  JoinTable,  ManyToMany,  ManyToOne,  OneT
 import { Offer } from "./Offer";
 import { User } from "./User";
 import { Message } from './Message'
-import { AnnouncementTag } from "./AnnouncementTag";
 import { Tag } from "./Tag";
 
 @Entity("announcements")

@@ -1,7 +1,5 @@
 import { Column, Entity,  ManyToMany,  PrimaryGeneratedColumn } from "typeorm";
 import { Announcement } from "./Announcement";
-import { AnnouncementTag } from "./AnnouncementTag";
-
 
 @Entity("tags")
 export class Tag {
