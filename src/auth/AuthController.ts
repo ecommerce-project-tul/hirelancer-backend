@@ -5,6 +5,8 @@ import RegistrationRequestDto from "./RegistrationRequestDto";
 import userRepository from "../repository/UserRepository";
 import UserWithThatEmailAlreadyExistsException from "../exception/UserWithThatEmailAlreadyExistsException";
 import { User } from "../entity/User";
+import LoginRequestDto from "./LoginRequestDto";
+import UserNotFoundException from "../exception/UserNotFoundException";
 
 export default class AuthController {
 
@@ -17,6 +19,7 @@ export default class AuthController {
 
     private initializeRoutes() {
         this.router.post(`${this.path}/register`, validationMiddleware(RegistrationRequestDto), this.registerUser);
+        this.router.post(`${this.path}/login`, validationMiddleware(LoginRequestDto), this.loginUser);
     }
 
     public async registerUser(request: Request, response: Response, next: NextFunction) {
@@ -39,4 +42,20 @@ export default class AuthController {
             next(error);
         }
     } 
+    public async loginUser(request: Request, response: Response, next: NextFunction) {
+        const userData: LoginRequestDto = request.body;
+        try {
+            const user: User = await userRepository.findOne({where:{email: userData.email}});
+            if (user == null) {
+                throw new UserNotFoundException(userData.email);    
+            }
+            if (bcrypt.compareSync(userData.password, user.password)) {
+                response.send(user)
+            }
+            response.status(404).json("Hasło lub email są niepoprawne");
+        } catch (error) {
+            next(error);
+        }
+    } 
+    
 }
