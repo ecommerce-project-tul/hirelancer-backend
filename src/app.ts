@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import UserController from './controller/UserController'
 import appDataSource from './database/init'
+import AuthController from './auth/AuthController'
 
 dotenv.config();
 const app = express()
@@ -19,6 +20,7 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use("/", new UserController().router);
+app.use("/", new AuthController().router);
 
 
 const PORT = process.env.PORT || 3000;
