@@ -50,5 +50,5 @@ export class User {
     offers: Offer[];
 
     @OneToMany(() => UserTechnologyStack, userTechnologyStack => userTechnologyStack.user)
-    technologyStacks: UserTechnologyStack[]
+    userTechnologyStacks: UserTechnologyStack[]
 }
