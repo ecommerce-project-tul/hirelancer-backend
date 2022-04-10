@@ -10,7 +10,7 @@ export class User {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column("varchar")
+    @Column("varchar", {nullable: true})
     photo: string;
 
     @Column("varchar")
@@ -25,19 +25,19 @@ export class User {
     @Column("varchar", {name: "last_name"})
     lastName: string;
 
-    @Column({type: "varchar", enum: EUserRole})
+    @Column({type: "varchar", enum: EUserRole, nullable: true})
     role: EUserRole;
 
-    @Column("varchar", {name: "linkedin_token"})
+    @Column("varchar", {name: "linkedin_token", nullable: true})
     linkedInToken: string;
 
-    @Column("varchar", {name: "github_link"})
+    @Column("varchar", {name: "github_link", nullable: true})
     githubLink: string;
 
-    @Column("varchar", {name: "linkedin_link"})
+    @Column("varchar", {name: "linkedin_link", nullable: true})
     linkedInLink: string;
 
-    @Column("text")
+    @Column("text", {nullable: true})
     description: string;
 
     @OneToMany(() => Review, review => review.client)
