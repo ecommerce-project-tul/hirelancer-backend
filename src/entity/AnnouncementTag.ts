@@ -6,14 +6,12 @@ import { Tag } from "./Tag";
 export class AnnouncementTag {
     @PrimaryGeneratedColumn("uuid")
     id: string;
-
-
-
+    
     @ManyToOne(() => Announcement, announcement => announcement.tags)
     @JoinColumn({name: "announcement_id"})
     announcement: Announcement    
 
-    @ManyToOne(()=> Tag, tag => tag.id)
+    @ManyToOne(() => Tag, tag => tag.id)
     @JoinColumn({name: "tag_id"})
     tag: Tag
 

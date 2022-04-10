@@ -1,8 +1,9 @@
-import { Column, Entity,  JoinColumn,  ManyToOne,  OneToMany,  OneToOne,  PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity,  JoinColumn,  JoinTable,  ManyToMany,  ManyToOne,  OneToMany,  OneToOne,  PrimaryGeneratedColumn, TableCheck } from "typeorm";
 import { Offer } from "./Offer";
 import { User } from "./User";
 import { Message } from './Message'
 import { AnnouncementTag } from "./AnnouncementTag";
+import { Tag } from "./Tag";
 
 @Entity("announcements")
 export class Announcement {
@@ -37,6 +38,15 @@ export class Announcement {
     @OneToMany(() => Message, message => message.announcement)
     messages: Message[];
 
-    @OneToMany(() => AnnouncementTag, announcementTag => announcementTag.announcement)
-    tags: AnnouncementTag[]; 
+    @ManyToMany(() => Tag, tag => tag.announcements)
+    @JoinTable({ 
+        name: "announcement_tags", 
+        joinColumn: {
+            name: "announcement_id"
+        },
+        inverseJoinColumn: {
+            name: "tag_id"
+        }
+    })
+    tags: Tag[]; 
 }

@@ -17,9 +17,10 @@ const appDataSource = new DataSource({
     username : "postgres",
     password : "skorpion1",
     database : "hirelancer",
-    entities : [User, Announcement, Review, Payment, Tag, TechnologyStack, Offer, UserTechnologyStack, Message, AnnouncementTag],
+    entities : [User, Announcement, Review, Payment, Tag, TechnologyStack, Offer, UserTechnologyStack, Message],
     logging : true,
-    synchronize: true
+    synchronize: true,
+    dropSchema: true,
 })
 
 export default appDataSource;
