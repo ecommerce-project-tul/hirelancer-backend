@@ -7,6 +7,7 @@ import UserWithThatEmailAlreadyExistsException from "../exception/UserWithThatEm
 import { User } from "../entity/User";
 import LoginRequestDto from "./LoginRequestDto";
 import UserNotFoundException from "../exception/UserNotFoundException";
+import IncorrectEmailOrPasswordException from "../exception/IncorrectEmailOrPasswordException";
 
 export default class AuthController {
 
@@ -36,7 +37,6 @@ export default class AuthController {
                 password: hashedPassword,
               });
               await userRepository.save(user);
-              
               response.status(201).json({message: "Pomyślnie zarejestrowano"});
         } catch (error) {
             next(error);
@@ -46,13 +46,13 @@ export default class AuthController {
         const userData: LoginRequestDto = request.body;
         try {
             const user: User = await userRepository.findOne({where:{email: userData.email}});
-            if (user == null) {
+            if (user === null) {
                 throw new UserNotFoundException(userData.email);    
             }
-            if (bcrypt.compareSync(userData.password, user.password)) {
-                response.send(user)
+            if (!bcrypt.compareSync(userData.password, user.password)) {
+                throw new IncorrectEmailOrPasswordException();
             }
-            response.status(404).json("Hasło lub email są niepoprawne");
+            response.status(404).json(user);
         } catch (error) {
             next(error);
         }
