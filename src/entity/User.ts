@@ -1,4 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Announcement } from "./Announcement";
+import { EUserRole } from "./enum/EUserRole";
+import { Offer } from "./Offer";
+import { Review } from "./Review";
+import { UserTechnologyStack } from "./UserTechnologyStack";
 
 @Entity("users")
 export class User {
@@ -20,8 +25,8 @@ export class User {
     @Column("varchar", {name: "last_name"})
     lastName: string;
 
-    @Column("varchar", {name: "user_role"})
-    userRole: string;
+    @Column({type: "varchar", enum: EUserRole})
+    role: EUserRole;
 
     @Column("varchar", {name: "linkedin_token"})
     linkedInToken: string;
@@ -34,4 +39,16 @@ export class User {
 
     @Column("text")
     description: string;
+
+    @OneToMany(() => Review, review => review.client)
+    reviews: Review[];
+
+    @OneToMany(() => Announcement, announcement => announcement.client)
+    announcements: Announcement[];
+
+    @OneToMany(() => Offer, offer => offer.freelancer)
+    offers: Offer[];
+
+    @OneToMany(() => UserTechnologyStack, userTechnologyStack => userTechnologyStack.user)
+    technologyStacks: UserTechnologyStack[]
 }
