@@ -16,9 +16,7 @@ export default class UserController {
     }
 
     private async getUsers(request: Request, response: Response) {
-        console.log(userRepository)
-
-        const test = await userRepository.find();
-        response.json(test);
+        const users = await userRepository.find();
+        response.status(200).json(users);
     }
 }
