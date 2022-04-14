@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import userRepository from "../repository/UserRepository";
-
+import authMiddleware from '../middleware/auth-middleware'
+import { EUserRole } from "../enum/EUserRole";
 
 export default class UserController {
 
@@ -12,7 +13,7 @@ export default class UserController {
     }
 
     private initializeRoutes() {
-        this.router.get(`${this.path}/`, this.getUsers);
+        this.router.get(`${this.path}/`, authMiddleware([]) ,this.getUsers)
     }
 
     private async getUsers(request: Request, response: Response) {

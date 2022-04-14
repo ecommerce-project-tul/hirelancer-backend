@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Announcement } from "./Announcement";
-import { EUserRole } from "./enum/EUserRole";
+import { EUserRole } from "../enum/EUserRole";
 import { Offer } from "./Offer";
 import { Review } from "./Review";
 import { UserTechnologyStack } from "./UserTechnologyStack";
@@ -25,7 +25,7 @@ export class User {
     @Column("varchar", {name: "last_name"})
     lastName: string;
 
-    @Column({type: "varchar", enum: EUserRole, nullable: true})
+    @Column({type: "varchar", enum: EUserRole})
     role: EUserRole;
 
     @Column("varchar", {name: "linkedin_token", nullable: true})

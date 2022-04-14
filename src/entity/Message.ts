@@ -1,6 +1,6 @@
 import { Column, Entity,  JoinColumn,  OneToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Announcement } from "./Announcement";
-import { EMessageType } from "./enum/EMessageType";
+import { EMessageType } from "../enum/EMessageType";
 
 @Entity("messages")
 export class Message {

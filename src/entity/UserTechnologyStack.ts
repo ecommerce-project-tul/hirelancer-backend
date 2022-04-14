@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { EUserRole } from "./enum/EUserRole";
+import { EUserRole } from "../enum/EUserRole";
 import { TechnologyStack } from "./TechnologyStack";
 import { User } from "./User";
 

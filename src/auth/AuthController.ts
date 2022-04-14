@@ -11,6 +11,7 @@ import IncorrectEmailOrPasswordException from "../exception/IncorrectEmailOrPass
 import * as jwt from 'jsonwebtoken'
 import RegistrationResponseDto from "./RegistrationResponseDto";
 import LoginResponseDto from "./LoginResponseDto";
+import IDataStoredInToken from "../interface/IDataStoredInToken";
 
 export default class AuthController {
 
@@ -57,7 +58,7 @@ export default class AuthController {
         const userData: LoginRequestDto = request.body;
         try {
             const user: User = await userRepository.findOne({where:{email: userData.email}});
-            
+
             if (user === null) {
                 throw new UserNotFoundException(userData.email);    
             }
@@ -71,7 +72,7 @@ export default class AuthController {
 
             const res: LoginResponseDto = {
                 expiresIn,
-                token: jwt.sign({ ...user }, secret, { expiresIn }),
+                token: jwt.sign({ userId: user.id } as IDataStoredInToken, secret, { expiresIn }),
             }
 
             response.status(201).json(res);
