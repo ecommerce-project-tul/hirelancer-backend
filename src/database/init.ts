@@ -22,7 +22,7 @@ const appDataSource = new DataSource({
     entities : [User, Announcement, Review, Payment, Tag, TechnologyStack, Offer, UserTechnologyStack, Message],
     logging : true,
     synchronize: true,
-    dropSchema: true,
+    dropSchema: false,
 })
 
 export default appDataSource;
