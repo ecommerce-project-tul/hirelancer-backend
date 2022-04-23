@@ -25,8 +25,22 @@ export default class AnnouncementController {
     private initializeRoutes() {
         this.router.post(`${this.path}`, validationMiddleware(AddAnnouncementRequestDto), this.addAnnouncement);
         this.router.get(`${this.path}/:id`, this.getAnnouncementById);
+        this.router.get(`${this.path}s/`, this.getAllAnnouncements);
         this.router.put(`${this.path}/:id`, validationMiddleware(UpdateAnnouncementRequestDto), this.updateAnnouncement);
         this.router.put(`${this.path}/:id/status`, validationMiddleware(ChangeAnnouncementStatusRequestDto), this.updateAnnouncementStatus);
+    }
+
+    private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
+        const anncouncementId : string = request.params.id;
+        try {
+            const announcements: Announcement[] | null = await announcementRepository.find();
+            if (announcements === null || announcements.length === 0) {
+                throw new AnnouncementNotFoundException(anncouncementId);
+            }
+            response.status(200).json(announcements);
+        } catch(error) {
+            next(error);
+        }    
     }
 
     private async getAnnouncementById(request: Request, response: Response, next: NextFunction) {
