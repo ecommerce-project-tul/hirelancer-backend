@@ -8,6 +8,8 @@ import userRepository from "../repository/UserRepository";
 import tagRepository from "../tag/TagRepository";
 import AddAnnouncementRequestDto from "./AddAnnouncementRequestDto";
 import announcementRepository from "./AnnnouncementRepository";
+import UpdateAnnouncementRequestDto from "./UpdateAnnouncementRequestDto";
+import AnnouncementNotFoundException from "./AnnouncementNotFoundException";
 
 export default class AnnouncementController {
 
@@ -21,6 +23,7 @@ export default class AnnouncementController {
 
     private initializeRoutes() {
         this.router.post(`${this.path}`, this.addAnnouncement);
+        this.router.put(`${this.path}/:id`, this.updateAnnouncement);
     }
 
     private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
@@ -57,9 +60,42 @@ export default class AnnouncementController {
 
             response.status(201).json(res);
             
-        } catch(error) {
-            console.log(error)
+        } catch(error) {            
+            next(error);
+        }
+
+    }
+
+    private async updateAnnouncement(request: Request, response: Response, next: NextFunction) {
+        const announcementData: UpdateAnnouncementRequestDto = request.body as UpdateAnnouncementRequestDto;
+        const anncouncementId : string = request.params.id;
+        try {
+
+            let tag: Tag | null = await tagRepository.findOne({where: {name: announcementData.tagName}});
+            if (tag === null) {
+                tag = tagRepository.create({name : announcementData.tagName});
+                await tagRepository.save(tag);
+            }
             
+            const announcement: Announcement | null = await announcementRepository.findOneBy({id: anncouncementId});
+            if (announcement === null) {
+                throw new AnnouncementNotFoundException(anncouncementId);
+            }
+
+            announcement.description = announcementData.description || announcement.description;
+            announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
+            announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;
+            announcement.tags = [tag] || announcement.tags;
+            await announcementRepository.save(announcement);
+            
+            const res = {
+                message: "Updating announcement succesful",
+                anncouncementId: anncouncementId
+            };
+
+            response.status(200).json(res);
+            
+        } catch(error) {
             next(error);
         }
 
