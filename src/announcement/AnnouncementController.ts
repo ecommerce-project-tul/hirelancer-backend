@@ -23,8 +23,8 @@ export default class AnnouncementController {
     }
 
     private initializeRoutes() {
-        this.router.post(`${this.path}`, this.addAnnouncement);
-        this.router.put(`${this.path}/:id`, this.updateAnnouncement);
+        this.router.post(`${this.path}`, validationMiddleware(AddAnnouncementRequestDto), this.addAnnouncement);
+        this.router.put(`${this.path}/:id`, validationMiddleware(UpdateAnnouncementRequestDto), this.updateAnnouncement);
         this.router.put(`${this.path}/:id/status`, validationMiddleware(ChangeAnnouncementStatusRequestDto), this.updateAnnouncementStatus);
     }
 
