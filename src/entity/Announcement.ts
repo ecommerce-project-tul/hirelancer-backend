@@ -1,4 +1,4 @@
-import { Column, Entity,  JoinColumn,  JoinTable,  ManyToMany,  ManyToOne,  OneToMany,  OneToOne,  PrimaryGeneratedColumn, TableCheck } from "typeorm";
+import { Column, Entity,  JoinColumn,  JoinTable,  ManyToMany,  ManyToOne,  OneToMany,  OneToOne,  PrimaryGeneratedColumn, TableCheck, Timestamp } from "typeorm";
 import { Offer } from "./Offer";
 import { User } from "./User";
 import { Message } from './Message'
@@ -19,7 +19,7 @@ export class Announcement {
     // @Column({type: "uuid", name: "chosen_offer_id"})
     // chosenOfferId: string
 
-    @OneToOne(() => Offer, offer => offer.announcement)
+    @OneToOne(() => Offer, offer => offer.announcement, {nullable: true})
     chosenOffer: Offer;
 
     @Column('text')
@@ -31,10 +31,13 @@ export class Announcement {
     @Column({type: "date", name: "deadline_name"})
     deadlineDate: Date;
 
-    @Column({type: "boolean", name: "is_active"})
+    @Column('timestamp', {name: "creation_date", default: new Date()})
+    creationDate: Date;
+
+    @Column({type: "boolean", name: "is_active", nullable: true})
     isActive: boolean;
 
-    @OneToMany(() => Message, message => message.announcement)
+    @OneToMany(() => Message, message => message.announcement, {nullable: true})
     messages: Message[];
 
     @ManyToMany(() => Tag, tag => tag.announcements)
