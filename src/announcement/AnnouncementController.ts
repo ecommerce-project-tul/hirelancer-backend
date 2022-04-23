@@ -11,6 +11,8 @@ import announcementRepository from "./AnnnouncementRepository";
 import UpdateAnnouncementRequestDto from "./UpdateAnnouncementRequestDto";
 import AnnouncementNotFoundException from "./AnnouncementNotFoundException";
 import ChangeAnnouncementStatusRequestDto from "./ChangeAnnouncementStatusRequestDto";
+import querystring from "querystring";
+import { ParsedQs } from "qs";
 
 export default class AnnouncementController {
 
@@ -32,8 +34,23 @@ export default class AnnouncementController {
 
     private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
         const anncouncementId : string = request.params.id;
+        const tags = request.query.tags + "";
+        const parsed = tags.split(",").map(elem => elem);
+
         try {
-            const announcements: Announcement[] | null = await announcementRepository.find();
+            const tags: Tag[] | null = await tagRepository.createQueryBuilder("tag")
+            .where("tag.name IN (:...names)", { names: parsed})
+            .getMany(); 
+            
+            const announcements: Announcement[] | null = await announcementRepository.find({
+                where: {
+                    tags: tags
+                },
+                relations: {
+                    messages: true,
+                    tags: true,
+                }
+            })
             if (announcements === null || announcements.length === 0) {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
@@ -156,3 +173,4 @@ export default class AnnouncementController {
 
     }
 }
+
