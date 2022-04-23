@@ -3,13 +3,14 @@ import { Tag } from "entity/Tag";
 import { User } from "entity/User";
 import UserNotFoundException from "../exception/UserNotFoundException";
 import { Router, Response, Request, NextFunction } from "express";
-import validationMiddleware from "middleware/validation-middleware";
+import validationMiddleware from "../middleware/validation-middleware";
 import userRepository from "../repository/UserRepository";
 import tagRepository from "../tag/TagRepository";
 import AddAnnouncementRequestDto from "./AddAnnouncementRequestDto";
 import announcementRepository from "./AnnnouncementRepository";
 import UpdateAnnouncementRequestDto from "./UpdateAnnouncementRequestDto";
 import AnnouncementNotFoundException from "./AnnouncementNotFoundException";
+import ChangeAnnouncementStatusRequestDto from "./ChangeAnnouncementStatusRequestDto";
 
 export default class AnnouncementController {
 
@@ -24,6 +25,32 @@ export default class AnnouncementController {
     private initializeRoutes() {
         this.router.post(`${this.path}`, this.addAnnouncement);
         this.router.put(`${this.path}/:id`, this.updateAnnouncement);
+        this.router.put(`${this.path}/:id/status`, validationMiddleware(ChangeAnnouncementStatusRequestDto), this.updateAnnouncementStatus);
+    }
+
+    private async updateAnnouncementStatus(request: Request, response: Response, next: NextFunction) {
+        const announcementData: ChangeAnnouncementStatusRequestDto = request.body as ChangeAnnouncementStatusRequestDto;
+        const anncouncementId : string = request.params.id;
+        try {
+
+            const announcement: Announcement | null = await announcementRepository.findOneBy({id: anncouncementId});
+            if (announcement === null) {
+                throw new AnnouncementNotFoundException(anncouncementId);
+            }
+            
+            announcement.isActive = announcementData.isActive || announcement.isActive;
+            await announcementRepository.save(announcement);
+            
+            const res = {
+                message: "Updating announcement status",
+                anncouncementId: anncouncementId
+            };
+
+            response.status(200).json(res);
+            
+        } catch(error) {
+            next(error);
+        }
     }
 
     private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
