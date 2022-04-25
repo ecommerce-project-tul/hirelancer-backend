@@ -1,8 +1,10 @@
+import { Router, Response, Request, NextFunction } from "express";
+
 import { Announcement } from "entity/Announcement";
 import { Tag } from "entity/Tag";
 import { User } from "entity/User";
+
 import UserNotFoundException from "../exception/UserNotFoundException";
-import { Router, Response, Request, NextFunction } from "express";
 import validationMiddleware from "../middleware/validation-middleware";
 import userRepository from "../repository/UserRepository";
 import tagRepository from "../tag/TagRepository";
@@ -11,8 +13,6 @@ import announcementRepository from "./AnnnouncementRepository";
 import UpdateAnnouncementRequestDto from "./UpdateAnnouncementRequestDto";
 import AnnouncementNotFoundException from "./AnnouncementNotFoundException";
 import ChangeAnnouncementStatusRequestDto from "./ChangeAnnouncementStatusRequestDto";
-import querystring from "querystring";
-import { ParsedQs } from "qs";
 
 export default class AnnouncementController {
 
@@ -34,8 +34,8 @@ export default class AnnouncementController {
 
     private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
         const anncouncementId : string = request.params.id;
-        const tags = request.query.tags + "";
-        const parsed = tags.split(",").map(elem => elem);
+        const tags = String(request.query.tags);
+        const parsed = tags.split(",");
 
         try {
             const tags: Tag[] | null = await tagRepository.createQueryBuilder("tag")
@@ -51,9 +51,11 @@ export default class AnnouncementController {
                     tags: true,
                 }
             })
+
             if (announcements === null || announcements.length === 0) {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
+
             response.status(200).json(announcements);
         } catch(error) {
             next(error);
@@ -63,10 +65,15 @@ export default class AnnouncementController {
     private async getAnnouncementById(request: Request, response: Response, next: NextFunction) {
         const anncouncementId : string = request.params.id;
         try {
-            const announcement: Announcement | null = await announcementRepository.findOneBy({id: anncouncementId});
+            
+            const announcement: Announcement | null = await announcementRepository.findOneBy(
+                {id: anncouncementId}
+            );
+
             if (announcement === null) {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
+
             response.status(200).json(announcement);
         } catch(error) {
             next(error);
@@ -78,7 +85,9 @@ export default class AnnouncementController {
         const anncouncementId : string = request.params.id;
         try {
 
-            const announcement: Announcement | null = await announcementRepository.findOneBy({id: anncouncementId});
+            const announcement: Announcement | null = await announcementRepository.findOneBy(
+                {id: anncouncementId})
+            ;
             if (announcement === null) {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
@@ -101,12 +110,21 @@ export default class AnnouncementController {
     private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
         const announcementData: AddAnnouncementRequestDto = request.body;
         try {
-            const user: User | null = await userRepository.findOne({where: {email : announcementData.email}});
+            const user: User | null = await userRepository.findOne({
+                    where: {
+                        email : announcementData.email
+                    }
+                });
+
             if (user === null) {
                 throw new UserNotFoundException(announcementData.email)
             }
 
-            let tag: Tag | null = await tagRepository.findOne({where: {name: announcementData.tagName}});
+            let tag: Tag | null = await tagRepository.findOne({
+                where: {
+                    name: announcementData.tagName
+                }});
+
             if (tag === null) {
                 tag = tagRepository.create({name : announcementData.tagName});
                 await tagRepository.save(tag);
@@ -143,13 +161,20 @@ export default class AnnouncementController {
         const anncouncementId : string = request.params.id;
         try {
 
-            let tag: Tag | null = await tagRepository.findOne({where: {name: announcementData.tagName}});
+            let tag: Tag | null = await tagRepository.findOne({
+                where: {
+                    name: announcementData.tagName
+                }});
+                
             if (tag === null) {
                 tag = tagRepository.create({name : announcementData.tagName});
                 await tagRepository.save(tag);
             }
             
-            const announcement: Announcement | null = await announcementRepository.findOneBy({id: anncouncementId});
+            const announcement: Announcement | null = await announcementRepository.findOneBy({
+                id: anncouncementId
+            });
+
             if (announcement === null) {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
@@ -158,6 +183,7 @@ export default class AnnouncementController {
             announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
             announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;
             announcement.tags = [tag] || announcement.tags;
+            
             await announcementRepository.save(announcement);
             
             const res = {
