@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { Router, Request, Response, NextFunction } from "express";
 import validationMiddleware from "../middleware/validation-middleware";
 import RegistrationRequestDto from "./RegistrationRequestDto";
-import userRepository from "../repository/UserRepository";
+import userRepository from "../user/UserRepository";
 import UserWithThatEmailAlreadyExistsException from "../exception/UserWithThatEmailAlreadyExistsException";
 import { User } from "../entity/User";
 import LoginRequestDto from "./LoginRequestDto";

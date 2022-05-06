@@ -4,9 +4,9 @@ import AuthenticationTokenMissingException from '../exception/AuthenticationToke
 import WrongAuthenticationTokenException from '../exception/WrongAuthenticationTokenException';
 import IDataStoredInToken from '../interface/IDataStoredInToken';
 import IRequestWithUser from '../interface/IRequestWIthUser';
-import userRepository from '../repository/UserRepository';
+import userRepository from '../user/UserRepository';
 import { RequestHandler } from 'express';
-import { EUserRole } from '../enum/EUserRole';
+import { EUserRole } from '../user/EUserRole';
 import UnauthroizedRoleException from '../exception/UnauthroizedUserRoleExcpetion';
 
  function authMiddleware(authorizedRoles?: EUserRole[]): RequestHandler {

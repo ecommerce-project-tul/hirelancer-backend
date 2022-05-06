@@ -6,7 +6,7 @@ import { User } from "entity/User";
 
 import UserNotFoundException from "../exception/UserNotFoundException";
 import validationMiddleware from "../middleware/validation-middleware";
-import userRepository from "../repository/UserRepository";
+import userRepository from "../user/UserRepository";
 import tagRepository from "../tag/TagRepository";
 import AddAnnouncementRequestDto from "./AddAnnouncementRequestDto";
 import announcementRepository from "./AnnnouncementRepository";

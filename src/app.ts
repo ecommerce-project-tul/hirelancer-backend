@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import UserController from './controller/UserController';
+import UserController from './user/UserController';
 import appDataSource from './database/init';
 import AuthController from './auth/AuthController';
 import errorMiddleware from './middleware/error-middleware';

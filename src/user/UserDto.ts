@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsOptional, IsString } from "class-validator";
-import { EUserRole } from "../enum/EUserRole";
+import { EUserRole } from "./EUserRole";
 
 export default class UserDto {
     @IsEmail()

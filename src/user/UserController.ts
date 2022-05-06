@@ -1,9 +1,7 @@
 import { Router, Request, Response, RequestHandler, NextFunction } from "express";
-import userRepository from "../repository/UserRepository";
-import authMiddleware from '../middleware/auth-middleware'
-import { EUserRole } from "../enum/EUserRole";
-import UserNotFoundException from "../exception/UserNotFoundException";
-import UpdateUserDto from "../dto/UpdateUserDto";
+import userRepository from "./UserRepository";
+import reviewRepository from "review/ReviewRepository";
+import UpdateUserDto from "./UpdateUserDto";
 
 export default class UserController {
 

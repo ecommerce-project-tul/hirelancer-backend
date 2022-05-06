@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Announcement } from "./Announcement";
-import { EUserRole } from "../enum/EUserRole";
+import { EUserRole } from "../user/EUserRole";
 import { Offer } from "./Offer";
 import { Review } from "./Review";
 import { UserTechnologyStack } from "./UserTechnologyStack";

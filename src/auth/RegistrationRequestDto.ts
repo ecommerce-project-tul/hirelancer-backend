@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsString } from "class-validator";
-import { EUserRole } from "../enum/EUserRole";
+import { EUserRole } from "../user/EUserRole";
 
 export default class RegistrationRequestDto {
     @IsEmail()
