@@ -4,6 +4,7 @@ import { EUserRole } from "../user/EUserRole";
 import { Offer } from "./Offer";
 import { Review } from "./Review";
 import { UserTechnologyStack } from "./UserTechnologyStack";
+import { classToPlain, Exclude } from "class-transformer";
 
 @Entity("users")
 export class User {
@@ -17,6 +18,7 @@ export class User {
     email: string;
 
     @Column("varchar")
+    @Exclude({ toPlainOnly: true })
     password: string;
 
     @Column("varchar", {name: "first_name"})
@@ -51,4 +53,8 @@ export class User {
 
     @OneToMany(() => UserTechnologyStack, userTechnologyStack => userTechnologyStack.user)
     userTechnologyStacks: UserTechnologyStack[]
+
+    toJSON() {
+        return classToPlain(this);
+    }
 }
