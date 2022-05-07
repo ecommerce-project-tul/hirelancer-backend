@@ -93,7 +93,7 @@ export default class UserController {
                 throw new WrongUserRoleException(EUserRole.FREELANCER)
             }
 
-           const reviews = await reviewRepository.findBy({freelancer: freelancer})
+           const reviews = await reviewRepository.findBy({freelancer: freelancer as unknown as boolean})
            response.status(200).json(reviews);
         } catch (error) {
             next(error);
