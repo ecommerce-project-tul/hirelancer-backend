@@ -44,7 +44,7 @@ export default class AnnouncementController {
             
             const announcements: Announcement[] | null = await announcementRepository.find({
                 where: {
-                    tags: tags
+                    tags: tags as unknown as boolean
                 },
                 relations: {
                     messages: true,
