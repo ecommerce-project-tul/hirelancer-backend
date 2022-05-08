@@ -33,7 +33,6 @@ export default class AnnouncementController {
     }
 
     private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
-        const anncouncementId : string = request.params.id;
         const tags = String(request.query.tags);
         const parsed = tags.split(",");
 
@@ -51,10 +50,6 @@ export default class AnnouncementController {
                     tags: true,
                 }
             })
-
-            if (announcements === null || announcements.length === 0) {
-                throw new AnnouncementNotFoundException(anncouncementId);
-            }
 
             response.status(200).json(announcements);
         } catch(error) {
