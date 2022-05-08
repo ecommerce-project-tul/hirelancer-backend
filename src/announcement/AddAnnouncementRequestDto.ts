@@ -5,6 +5,9 @@ export default class AddAnnouncementRequestDto {
     email: string;
 
     @IsString()
+    title: string;
+
+    @IsString()
     description: string;
 
     @IsNumber()

@@ -22,6 +22,9 @@ export class Announcement {
     @OneToOne(() => Offer, offer => offer.announcement, {nullable: true})
     chosenOffer: Offer;
 
+    @Column("varchar")
+    title: string;
+
     @Column('text')
     description: string;
 

@@ -128,6 +128,7 @@ export default class AnnouncementController {
             const announcement: Announcement = announcementRepository.create(
                 {
                     client: user,
+                    title: announcementData.title,
                     description: announcementData.description,
                     startingPrice: announcementData.startingPrice,
                     deadlineDate: announcementData.deadlineDate,
@@ -174,6 +175,7 @@ export default class AnnouncementController {
                 throw new AnnouncementNotFoundException(anncouncementId);
             }
 
+            announcement.title = announcementData.title || announcement.title
             announcement.description = announcementData.description || announcement.description;
             announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
             announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;

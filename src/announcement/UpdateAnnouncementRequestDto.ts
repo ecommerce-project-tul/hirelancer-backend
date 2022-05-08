@@ -3,6 +3,9 @@ import { IsDate, IsDecimal, IsEmail, IsString } from "class-validator";
 export default class UpdateAnnouncementRequestDto {
 
     @IsString()
+    title: string;
+
+    @IsString()
     description: string;
 
     @IsDecimal()
