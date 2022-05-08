@@ -1,4 +1,4 @@
-import { IsDate, IsDecimal, IsEmail, IsString } from "class-validator";
+import { IsDateString, IsEmail, IsNumber, IsString } from "class-validator";
 
 export default class AddAnnouncementRequestDto {
     @IsEmail()
@@ -7,10 +7,10 @@ export default class AddAnnouncementRequestDto {
     @IsString()
     description: string;
 
-    @IsDecimal()
+    @IsNumber()
     startingPrice: number;
 
-    @IsDate()
+    @IsDateString()
     deadlineDate: Date;
     
     @IsString()
