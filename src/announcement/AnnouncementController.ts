@@ -82,10 +82,11 @@ export default class AnnouncementController {
           where: {
             tags: tags as unknown as boolean,
           },
-          relations: {
-            messages: true,
-            tags: true,
-          },
+          relations: [
+            "messages",
+            "messages.user",
+            "tags"
+          ],
         });
 
       response.status(200).json(announcements);
@@ -290,6 +291,7 @@ export default class AnnouncementController {
       const message: Message = messageRepository.create({
         announcement: announcement,
         content: addQuestionRequest.content,
+        user: user,
         isAnonymous: addQuestionRequest.isAnonymous,
         messageType: EMessageType.QUESTION,
       });

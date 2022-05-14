@@ -5,6 +5,7 @@ import { Offer } from "./Offer";
 import { Review } from "./Review";
 import { UserTechnologyStack } from "./UserTechnologyStack";
 import { classToPlain, Exclude } from "class-transformer";
+import { Message } from "./Message";
 
 @Entity("users")
 export class User {
@@ -53,6 +54,9 @@ export class User {
 
     @OneToMany(() => UserTechnologyStack, userTechnologyStack => userTechnologyStack.user)
     userTechnologyStacks: UserTechnologyStack[]
+
+    @OneToMany(()=> Message, message => message.user)
+    messages: Message[]
 
     toJSON() {
         return classToPlain(this);

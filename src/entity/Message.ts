@@ -1,6 +1,7 @@
 import { Column, Entity,  JoinColumn,  OneToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Announcement } from "./Announcement";
 import { EMessageType } from "../enum/EMessageType";
+import { User } from "./User";
 
 @Entity("messages")
 export class Message {
@@ -18,6 +19,10 @@ export class Message {
     @OneToMany(() => Message, message => message.id)
     @JoinColumn({name: "message_id"})
     message?: Message;
+
+    @ManyToOne(()=> User, user => user.messages)
+    @JoinColumn({name: "user_id"})
+    user: User;
 
     @Column({type: "uuid", name: "message_id", nullable: true})
     messageId?: string;
