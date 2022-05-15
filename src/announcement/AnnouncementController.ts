@@ -16,184 +16,204 @@ import ChangeAnnouncementStatusRequestDto from "./ChangeAnnouncementStatusReques
 
 export default class AnnouncementController {
 
-    public path = "/announcement";
-    public router: Router = Router();
+  public path = "/announcement";
+  public router: Router = Router();
 
-    constructor() {
-        debugger;
-        this.initializeRoutes();
-    }
+  constructor() {
+    debugger;
+    this.initializeRoutes();
+  }
 
-    private initializeRoutes() {
-        this.router.post(`${this.path}`, validationMiddleware(AddAnnouncementRequestDto), this.addAnnouncement);
-        this.router.get(`${this.path}/:id`, this.getAnnouncementById);
-        this.router.get(`${this.path}s/`, this.getAllAnnouncements);
-        this.router.put(`${this.path}/:id`, validationMiddleware(UpdateAnnouncementRequestDto), this.updateAnnouncement);
-        this.router.put(`${this.path}/:id/status`, validationMiddleware(ChangeAnnouncementStatusRequestDto), this.updateAnnouncementStatus);
-    }
+  private initializeRoutes() {
+    this.router.post(`${this.path}`, validationMiddleware(AddAnnouncementRequestDto), this.addAnnouncement);
+    this.router.get(`${this.path}/:id`, this.getAnnouncementById);
+    this.router.get(`${this.path}s/`, this.getAllAnnouncements);
+    this.router.put(`${this.path}/:id`, validationMiddleware(UpdateAnnouncementRequestDto), this.updateAnnouncement);
+    this.router.put(`${this.path}/:id/status`, validationMiddleware(ChangeAnnouncementStatusRequestDto), this.updateAnnouncementStatus);
+  }
 
-    private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
-        const tags = String(request.query.tags);
-        const parsed = tags.split(",");
+  private async getAllAnnouncements(request: Request, response: Response, next: NextFunction) {
+    const tags = String(request.query.tags);
+    const parsed = tags.split(",");
 
-        try {
-            const tags: Tag[] | null = await tagRepository.createQueryBuilder("tag")
-            .where("tag.name IN (:...names)", { names: parsed})
-            .getMany(); 
-            
-            const announcements: Announcement[] | null = await announcementRepository.find({
-                where: {
-                    tags: tags as unknown as boolean
-                },
-                relations: {
-                    messages: true,
-                    tags: true,
-                }
-            })
+    try {
+      const tags: Tag[] | null = await tagRepository.createQueryBuilder("tag")
+        .where("tag.name IN (:...names)", { names: parsed })
+        .getMany();
 
-            response.status(200).json(announcements);
-        } catch(error) {
-            next(error);
-        }    
-    }
-
-    private async getAnnouncementById(request: Request, response: Response, next: NextFunction) {
-        const anncouncementId : string = request.params.id;
-        try {
-            
-            const announcement: Announcement | null = await announcementRepository.findOneBy(
-                {id: anncouncementId}
-            );
-
-            if (announcement === null) {
-                throw new AnnouncementNotFoundException(anncouncementId);
-            }
-
-            response.status(200).json(announcement);
-        } catch(error) {
-            next(error);
-        }    
-    }
-
-    private async updateAnnouncementStatus(request: Request, response: Response, next: NextFunction) {
-        const announcementData: ChangeAnnouncementStatusRequestDto = request.body as ChangeAnnouncementStatusRequestDto;
-        const anncouncementId : string = request.params.id;
-        try {
-
-            const announcement: Announcement | null = await announcementRepository.findOneBy(
-                {id: anncouncementId})
-            ;
-            if (announcement === null) {
-                throw new AnnouncementNotFoundException(anncouncementId);
-            }
-            
-            announcement.isActive = announcementData.isActive || announcement.isActive;
-            await announcementRepository.save(announcement);
-            
-            const res = {
-                message: "Updating announcement status",
-                anncouncementId: anncouncementId
-            };
-
-            response.status(200).json(res);
-            
-        } catch(error) {
-            next(error);
+      const announcements: Announcement[] | null = await announcementRepository.find({
+        where: {
+          tags: tags as unknown as boolean
+        },
+        relations: {
+          messages: true,
+          tags: true,
         }
+      })
+
+      response.status(200).json(announcements);
+    } catch (error) {
+      next(error);
     }
+  }
 
-    private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
-        const announcementData: AddAnnouncementRequestDto = request.body;
-        try {
-            const user: User | null = await userRepository.findOne({
-                    where: {
-                        email : announcementData.email
-                    }
-                });
+  private async getAnnouncementById(request: Request, response: Response, next: NextFunction) {
+    const anncouncementId: string = request.params.id;
+    try {
 
-            if (user === null) {
-                throw new UserNotFoundException(announcementData.email)
-            }
+      const announcement: Announcement | null = await announcementRepository.findOneBy(
+        { id: anncouncementId }
+      );
 
-            let tag: Tag | null = await tagRepository.findOne({
-                where: {
-                    name: announcementData.tagName
-                }});
+      if (announcement === null) {
+        throw new AnnouncementNotFoundException(anncouncementId);
+      }
 
-            if (tag === null) {
-                tag = tagRepository.create({name : announcementData.tagName});
-                await tagRepository.save(tag);
-            }
-            
-            const announcement: Announcement = announcementRepository.create(
-                {
-                    client: user,
-                    title: announcementData.title,
-                    description: announcementData.description,
-                    startingPrice: announcementData.startingPrice,
-                    deadlineDate: announcementData.deadlineDate,
-                    tags: [tag]
-                }
-            )
+      response.status(200).json(announcement);
+    } catch (error) {
+      next(error);
+    }
+  }
 
-            await announcementRepository.save(announcement);
-            
-            const res = {
-                message: "Adding announcement succesful",
-                userId: user.id,
-                anncouncementId: announcement.id
-            };
+  private async updateAnnouncementStatus(request: Request, response: Response, next: NextFunction) {
+    const announcementData: ChangeAnnouncementStatusRequestDto = request.body as ChangeAnnouncementStatusRequestDto;
+    const anncouncementId: string = request.params.id;
+    try {
 
-            response.status(201).json(res);
-            
-        } catch(error) {            
-            next(error);
+      const announcement: Announcement | null = await announcementRepository.findOneBy(
+        { id: anncouncementId })
+        ;
+      if (announcement === null) {
+        throw new AnnouncementNotFoundException(anncouncementId);
+      }
+
+      announcement.isActive = announcementData.isActive || announcement.isActive;
+      await announcementRepository.save(announcement);
+
+      const res = {
+        message: "Updating announcement status",
+        anncouncementId: anncouncementId
+      };
+
+      response.status(200).json(res);
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
+    const announcementData: AddAnnouncementRequestDto = request.body;
+    try {
+      const user: User | null = await userRepository.findOne({
+        where: {
+          email: announcementData.email
         }
+      });
 
-    }
+      if (user === null) {
+        throw new UserNotFoundException(announcementData.email)
+      }
 
-    private async updateAnnouncement(request: Request, response: Response, next: NextFunction) {
-        const announcementData: UpdateAnnouncementRequestDto = request.body as UpdateAnnouncementRequestDto;
-        const anncouncementId : string = request.params.id;
-        try {
+      const tags: Tag[] = await Promise.all(
+        announcementData.tagName.split(",").map(async (tagName: string) => {
+          tagName = tagName.replace(/\s/g,'');
+          if(tagName === '') 
+            return;
 
-            let tag: Tag | null = await tagRepository.findOne({
-                where: {
-                    name: announcementData.tagName
-                }});
-                
-            if (tag === null) {
-                tag = tagRepository.create({name : announcementData.tagName});
-                await tagRepository.save(tag);
+          let tag: Tag | null = await tagRepository.findOne({
+            where: {
+              name: tagName
             }
-            
-            const announcement: Announcement | null = await announcementRepository.findOneBy({
-                id: anncouncementId
-            });
+          });
 
-            if (announcement === null) {
-                throw new AnnouncementNotFoundException(anncouncementId);
-            }
+          if (tag === null) {
+            tag = tagRepository.create({ name: tagName });
+            await tagRepository.save(tag);
+          }
 
-            announcement.title = announcementData.title || announcement.title
-            announcement.description = announcementData.description || announcement.description;
-            announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
-            announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;
-            announcement.tags = [tag] || announcement.tags;
-            
-            await announcementRepository.save(announcement);
-            
-            const res = {
-                message: "Updating announcement succesful",
-                anncouncementId: anncouncementId
-            };
+          return tag;
+        }))
 
-            response.status(200).json(res);
-            
-        } catch(error) {
-            next(error);
+      const announcement: Announcement = announcementRepository.create(
+        {
+          client: user,
+          title: announcementData.title,
+          description: announcementData.description,
+          startingPrice: announcementData.startingPrice,
+          deadlineDate: announcementData.deadlineDate,
+          tags: tags,
         }
+      )
 
+      await announcementRepository.save(announcement);
+
+      const res = {
+        message: "Adding announcement succesful",
+        userId: user.id,
+        anncouncementId: announcement.id
+      };
+
+      response.status(201).json(res);
+
+    } catch (error) {
+      next(error);
     }
+
+  }
+
+  private async updateAnnouncement(request: Request, response: Response, next: NextFunction) {
+    const announcementData: UpdateAnnouncementRequestDto = request.body as UpdateAnnouncementRequestDto;
+    const anncouncementId: string = request.params.id;
+    try {
+
+      const tags: Tag[] = await Promise.all(
+        announcementData.tagName.split(",").map(async (tagName: string) => {
+          tagName = tagName.replace(/\s/g,'');
+          if(tagName === '') 
+            return;
+
+          let tag: Tag | null = await tagRepository.findOne({
+            where: {
+              name: tagName
+            }
+          });
+
+          if (tag === null) {
+            tag = tagRepository.create({ name: tagName });
+            await tagRepository.save(tag);
+          }
+
+          return tag;
+        }))
+
+      const announcement: Announcement | null = await announcementRepository.findOneBy({
+        id: anncouncementId
+      });
+
+      if (announcement === null) {
+        throw new AnnouncementNotFoundException(anncouncementId);
+      }
+
+      announcement.title = announcementData.title || announcement.title
+      announcement.description = announcementData.description || announcement.description;
+      announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
+      announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;
+      announcement.tags = tags.length ? tags : announcement.tags;
+
+      await announcementRepository.save(announcement);
+
+      const res = {
+        message: "Updating announcement succesful",
+        anncouncementId: anncouncementId
+      };
+
+      response.status(200).json(res);
+
+    } catch (error) {
+      next(error);
+    }
+
+  }
 }
 
