@@ -46,6 +46,7 @@ export default class AnnouncementController {
       validationMiddleware(UpdateAnnouncementRequestDto),
       this.updateAnnouncement,
     );
+    this.router.delete(`${this.path}/:id`, this.deleteAnnouncement);
     this.router.put(
       `${this.path}/:id/status`,
       validationMiddleware(ChangeAnnouncementStatusRequestDto),
@@ -104,15 +105,15 @@ export default class AnnouncementController {
     try {
       const announcement: Announcement | null =
         await announcementRepository.findOne(
-          { 
+          {
             where: {
-              id: anncouncementId 
+              id: anncouncementId
             },
             relations: {
               messages: true
             }
           }
-          );
+        );
 
       if (announcement === null) {
         throw new AnnouncementNotFoundException(anncouncementId);
@@ -251,6 +252,35 @@ export default class AnnouncementController {
       };
 
       response.status(200).json(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private async deleteAnnouncement(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    const anncouncementId: string = request.params.id;
+    try {
+      const announcement: Announcement | null =
+        await announcementRepository.findOneBy({
+          id: anncouncementId,
+        });
+
+      if (announcement === null) {
+        throw new AnnouncementNotFoundException(anncouncementId);
+      }
+
+      await announcementRepository.remove(announcement);
+
+      const res = {
+        message: 'Deleting announcement succesful',
+        anncouncementId: anncouncementId,
+      };
+
+      response.status(200).send(res);
     } catch (error) {
       next(error);
     }
