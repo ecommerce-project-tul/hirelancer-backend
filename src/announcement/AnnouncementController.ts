@@ -84,8 +84,8 @@ export default class AnnouncementController {
             tags: tags as unknown as boolean,
           },
           relations: [
+            "client",
             "messages",
-            "messages.user",
             "tags"
           ],
         });
@@ -109,9 +109,13 @@ export default class AnnouncementController {
             where: {
               id: anncouncementId
             },
-            relations: {
-              messages: true
-            }
+            relations: [
+              "client",
+              "messages",
+              "messages.user",
+              "messages.parent",
+              "tags"
+            ]
           }
         );
 
@@ -331,6 +335,7 @@ export default class AnnouncementController {
       const res = {
         message: 'Creating question for announcement succesful',
         anncouncementId: announcementId,
+        questionId: message.id
       };
 
       response.status(201).send(res);
@@ -366,6 +371,9 @@ export default class AnnouncementController {
         where: {
           id: questionId,
         },
+        relations: {
+          parent: true,
+        }
       });
 
       if (question === null) {
@@ -393,19 +401,22 @@ export default class AnnouncementController {
         );
       }
 
+
       const answer: Message = messageRepository.create({
         announcement: announcement,
-        message: question,
+        user: user,
+        parent: question,
         content: addAnswerRequest.content,
         isAnonymous: false,
         messageType: EMessageType.ANSWER,
       });
 
       await messageRepository.save(answer);
-
+      
       const res = {
         message: 'Creating answer for question',
         questionId: questionId,
+        answerId: answer.id,
         anncouncementId: announcementId,
       };
 
