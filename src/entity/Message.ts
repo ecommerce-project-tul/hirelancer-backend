@@ -8,8 +8,10 @@ export class Message {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-
-    @ManyToOne(() => Announcement, announcement => announcement.messages)
+    @ManyToOne(() => Announcement, announcement => announcement.messages, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     @JoinColumn({name: "announcement_id"})
     announcement: Announcement
 
