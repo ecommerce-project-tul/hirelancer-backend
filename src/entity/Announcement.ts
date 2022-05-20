@@ -40,7 +40,10 @@ export class Announcement {
     @Column({type: "boolean", name: "is_active", nullable: true})
     isActive: boolean;
 
-    @OneToMany(() => Message, message => message.announcement, {nullable: true})
+    @OneToMany(() => Message, message => message.announcement, {
+        nullable: true, 
+        onDelete: "CASCADE"
+    })
     messages: Message[];
 
     @ManyToMany(() => Tag, tag => tag.announcements)
