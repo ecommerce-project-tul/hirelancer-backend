@@ -78,6 +78,7 @@ export default class AnnouncementController {
         .where('tag.name IN (:...names)', { names: parsed })
         .getMany();
 
+
       const announcements: Announcement[] | null =
         await announcementRepository.find({
           where: {
@@ -89,7 +90,6 @@ export default class AnnouncementController {
             "tags"
           ],
         });
-
       response.status(200).json(announcements);
     } catch (error) {
       next(error);
@@ -159,103 +159,114 @@ export default class AnnouncementController {
     }
   }
 
-  private async addAnnouncement(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  private async addAnnouncement(request: Request, response: Response, next: NextFunction) {
     const announcementData: AddAnnouncementRequestDto = request.body;
     try {
       const user: User | null = await userRepository.findOne({
         where: {
-          email: announcementData.email,
-        },
+          email: announcementData.email
+        }
       });
 
       if (user === null) {
-        throw new UserNotFoundException(announcementData.email);
+        throw new UserNotFoundException(announcementData.email)
       }
 
-      let tag: Tag | null = await tagRepository.findOne({
-        where: {
-          name: announcementData.tagName,
-        },
-      });
+      const tags: Tag[] = await Promise.all(
+        announcementData.tagName.split(",").map(async (tagName: string) => {
+          tagName = tagName.replace(/\s/g,'');
+          if(tagName === '') 
+            return;
 
-      if (tag === null) {
-        tag = tagRepository.create({ name: announcementData.tagName });
-        await tagRepository.save(tag);
-      }
+          let tag: Tag | null = await tagRepository.findOne({
+            where: {
+              name: tagName
+            }
+          });
 
-      const announcement: Announcement = announcementRepository.create({
-        client: user,
-        title: announcementData.title,
-        description: announcementData.description,
-        startingPrice: announcementData.startingPrice,
-        deadlineDate: announcementData.deadlineDate,
-        tags: [tag],
-      });
+          if (tag === null) {
+            tag = tagRepository.create({ name: tagName });
+            await tagRepository.save(tag);
+          }
+
+          return tag;
+        }))
+
+      const announcement: Announcement = announcementRepository.create(
+        {
+          client: user,
+          title: announcementData.title,
+          description: announcementData.description,
+          startingPrice: announcementData.startingPrice,
+          deadlineDate: announcementData.deadlineDate,
+          tags: tags,
+        }
+      )
 
       await announcementRepository.save(announcement);
 
       const res = {
-        message: 'Adding announcement succesful',
+        message: "Adding announcement succesful",
         userId: user.id,
-        anncouncementId: announcement.id,
+        anncouncementId: announcement.id
       };
 
       response.status(201).json(res);
+
     } catch (error) {
       next(error);
     }
+
   }
 
-  private async updateAnnouncement(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
-    const announcementData: UpdateAnnouncementRequestDto =
-      request.body as UpdateAnnouncementRequestDto;
+  private async updateAnnouncement(request: Request, response: Response, next: NextFunction) {
+    const announcementData: UpdateAnnouncementRequestDto = request.body as UpdateAnnouncementRequestDto;
     const anncouncementId: string = request.params.id;
     try {
-      let tag: Tag | null = await tagRepository.findOne({
-        where: {
-          name: announcementData.tagName,
-        },
+
+      const tags: Tag[] = await Promise.all(
+        announcementData.tagName.split(",").map(async (tagName: string) => {
+          tagName = tagName.replace(/\s/g,'');
+          if(tagName === '') 
+            return;
+
+          let tag: Tag | null = await tagRepository.findOne({
+            where: {
+              name: tagName
+            }
+          });
+
+          if (tag === null) {
+            tag = tagRepository.create({ name: tagName });
+            await tagRepository.save(tag);
+          }
+
+          return tag;
+        }))
+
+      const announcement: Announcement | null = await announcementRepository.findOneBy({
+        id: anncouncementId
       });
-
-      if (tag === null) {
-        tag = tagRepository.create({ name: announcementData.tagName });
-        await tagRepository.save(tag);
-      }
-
-      const announcement: Announcement | null =
-        await announcementRepository.findOneBy({
-          id: anncouncementId,
-        });
 
       if (announcement === null) {
         throw new AnnouncementNotFoundException(anncouncementId);
       }
 
-      announcement.title = announcementData.title || announcement.title;
-      announcement.description =
-        announcementData.description || announcement.description;
-      announcement.startingPrice =
-        announcementData.startingPrice || announcement.startingPrice;
-      announcement.deadlineDate =
-        announcementData.deadlineDate || announcement.deadlineDate;
-      announcement.tags = [tag] || announcement.tags;
+      announcement.title = announcementData.title || announcement.title
+      announcement.description = announcementData.description || announcement.description;
+      announcement.startingPrice = announcementData.startingPrice || announcement.startingPrice;
+      announcement.deadlineDate = announcementData.deadlineDate || announcement.deadlineDate;
+      announcement.tags = tags.length ? tags : announcement.tags;
 
       await announcementRepository.save(announcement);
 
       const res = {
-        message: 'Updating announcement succesful',
-        anncouncementId: anncouncementId,
+        message: "Updating announcement succesful",
+        anncouncementId: anncouncementId
       };
 
       response.status(200).json(res);
+
     } catch (error) {
       next(error);
     }
