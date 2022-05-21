@@ -22,6 +22,9 @@ export class Announcement {
     @OneToOne(() => Offer, offer => offer.announcement, {nullable: true})
     chosenOffer: Offer;
 
+    @OneToMany(() => Offer, offer => offer.announcement, {nullable: true})
+    offers: Offer[];
+
     @Column("varchar")
     title: string;
 

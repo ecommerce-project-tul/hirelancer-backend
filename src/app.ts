@@ -10,9 +10,16 @@ import errorMiddleware from './middleware/error-middleware';
 import loggerMiddleware from './middleware/logger-middleware';
 import AnnouncementController from './announcement/AnnouncementController';
 import cors from 'cors';
+import { ServerSocket } from './announcement/licitation/sockets';
+import http from 'http';
 
 dotenv.config();
 const app = express()
+const server = http.createServer(app);
+
+new ServerSocket(
+    server
+);
 
 app.set("views", path.join(__dirname, 'views'))
 app.set("view engine", 'ejs')
@@ -32,8 +39,9 @@ app.use(errorMiddleware)
 const PORT = process.env.PORT || 4000;
 appDataSource.initialize()
 .then(() => {
-    app.listen(PORT, ()=> console.log(`Server is listening on PORT - ${PORT}`))
+    server.listen(PORT, ()=> console.log(`Server is listening on PORT - ${PORT}`))
 })
 .catch((error) => {
     console.log(error)
 })
+

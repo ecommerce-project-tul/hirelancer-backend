@@ -17,9 +17,14 @@ export class Offer {
     // @Column({type: "uuid", name: "announcement_id"})
     // announcementId: string;
 
-    @OneToOne(() => Announcement, announcement => announcement.chosenOffer)
+    @ManyToOne(() => Announcement, announcement => announcement.offers)
     @JoinColumn({name: "announcement_id"})
     announcement: Announcement;
+
+
+    @OneToOne(() => Announcement, announcement => announcement.chosenOffer)
+    @JoinColumn({name: "xd_id"})
+    xd: Announcement;
 
     @Column("decimal")
     price: number;
