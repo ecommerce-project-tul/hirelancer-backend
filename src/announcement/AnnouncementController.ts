@@ -22,18 +22,24 @@ import { EMessageType } from '../enum/EMessageType';
 import { EUserRole } from '../user/EUserRole';
 import MessageNotFoundException from '../exception/MessageNotFoundException';
 import UserNotOwnAnnouncement from '../exception/UserNotOwnAnnouncementException';
+import HttpException from '../exception/HttpException';
+import Mailer from '../mailer'
+import Stripe from 'stripe'
 
 export default class AnnouncementController {
   public path = '/announcement';
 
+  private mailer: Mailer = null;
   public router: Router = Router();
 
-  constructor() {
+  constructor(mailer: Mailer) {
     debugger;
+    this.mailer = mailer;
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
+     
     this.router.post(
       `${this.path}`,
       validationMiddleware(AddAnnouncementRequestDto),
@@ -62,6 +68,8 @@ export default class AnnouncementController {
       validationMiddleware(AddAnswerRequest),
       this.answerTheQuestion,
     );
+    this.router.post(`${this.path}/:announcementId/checkout`, this.createCheckoutSession.bind(this))
+    this.router.get(`${this.path}/:announcementId/checkout/mail`, this.paymentMailNotification.bind(this))
   }
 
   private async getAllAnnouncements(
@@ -200,6 +208,7 @@ export default class AnnouncementController {
           startingPrice: announcementData.startingPrice,
           deadlineDate: announcementData.deadlineDate,
           tags: tags,
+
         }
       )
 
@@ -329,9 +338,9 @@ export default class AnnouncementController {
         throw new UserNotFoundException(addQuestionRequest.freelancerEmail);
       }
 
-      if (user.role !== EUserRole.FREELANCER) {
-        throw new WrongUserRoleException(EUserRole.FREELANCER);
-      }
+      // if (user.role !== EUserRole.FREELANCER) {
+      //   throw new WrongUserRoleException(EUserRole.FREELANCER);
+      // }
 
       const message: Message = messageRepository.create({
         announcement: announcement,
@@ -344,7 +353,7 @@ export default class AnnouncementController {
       await messageRepository.save(message);
 
       const res = {
-        message: 'Creating question for announcement succesful',
+        message: 'Pomyślnie dodano pytanie do ogłoszenia',
         anncouncementId: announcementId,
         questionId: message.id
       };
@@ -401,9 +410,9 @@ export default class AnnouncementController {
         throw new UserNotFoundException(addAnswerRequest.clientEmail);
       }
 
-      if (user.role !== EUserRole.CLIENT) {
-        throw new WrongUserRoleException(EUserRole.CLIENT);
-      }
+      // if (user.role !== EUserRole.CLIENT) {
+      //   throw new WrongUserRoleException(EUserRole.CLIENT);
+      // }
 
       if (announcement.client.email !== user.email) {
         throw new UserNotOwnAnnouncement(
@@ -425,7 +434,7 @@ export default class AnnouncementController {
       await messageRepository.save(answer);
       
       const res = {
-        message: 'Creating answer for question',
+        message: 'Pomyślnie dodano odpowiedź do ogłoszenia',
         questionId: questionId,
         answerId: answer.id,
         anncouncementId: announcementId,
@@ -436,4 +445,89 @@ export default class AnnouncementController {
       next(error);
     }
   }
+
+
+  public async createCheckoutSession(request: Request, response: Response, next: NextFunction) {
+    try {
+        const { announcementId } = request.params
+        const annoucement  = await announcementRepository.findOne(
+            { 
+                where: { id: announcementId }, 
+                relations: ["chosenOffer", "client", "chosenOffer.freelancer"]
+            }
+        )
+
+        if(!annoucement) {
+            throw new AnnouncementNotFoundException(announcementId);
+        }
+
+        if(!annoucement.chosenOffer) {
+            throw new HttpException(400, "Offer has not been chosen for announcement!")
+        }
+
+        const stripe = new Stripe(
+            "sk_test_51L404uLOSk9Raelfc5jEGkFxhmqjQUwMuq1eRq09HUqymwSwDAMXR1CsQ8sJNGtL1eqHOMg5wy3WyUFdyJhJ3mXd00wsT5lsyZ", 
+            {
+                apiVersion: '2020-08-27',
+            }
+        )
+
+        const product = await stripe.products.create({ 
+            name: annoucement.title
+        });
+
+
+        const price = await stripe.prices.create({
+            product: product.id,
+            unit_amount: annoucement.chosenOffer.price * 100,
+            currency: 'pln'
+        });
+
+        const session = await stripe.checkout.sessions.create({
+            line_items: [
+              {
+                price: price.id,
+                quantity: 1,
+              },
+            ],
+            mode: 'payment',
+            success_url: `http://localhost:4000/announcement/${annoucement.id}/mail?success=true`,
+            cancel_url:`http://localhost:4000/payment?success=false`,
+          });
+
+        return response.redirect(303, session.url);
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+  public async paymentMailNotification(request: Request, response: Response, next: NextFunction) {
+    try {
+        const { announcementId } = request.params;
+        const { success } = request.query;
+
+       const annoucement = await announcementRepository.findOne({
+         where: {
+           id: announcementId
+         },
+         relations: ["client", "chosenOffer", "chosenOffer.freelancer"]
+       })
+
+       if(!annoucement) {
+         throw new AnnouncementNotFoundException(announcementId)
+       }
+
+       console.log('-------------- ', success);
+       if(success) {
+         await this.mailer.sendMail(annoucement.client.email, "You have paid for offer,", "xdddd")
+         await this.mailer.sendMail(annoucement.chosenOffer.freelancer.email, "Your offer has been chosen", "xdddd");
+       } 
+
+      return response.status(200).json(success)
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }

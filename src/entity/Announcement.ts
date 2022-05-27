@@ -40,7 +40,7 @@ export class Announcement {
     @Column('timestamp', {name: "creation_date", default: new Date()})
     creationDate: Date;
 
-    @Column({type: "boolean", name: "is_active", nullable: true})
+    @Column({type: "boolean", name: "is_active", nullable: true, default: true})
     isActive: boolean;
 
     @OneToMany(() => Message, message => message.announcement, {

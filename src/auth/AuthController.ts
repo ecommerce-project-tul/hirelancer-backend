@@ -72,7 +72,7 @@ export default class AuthController {
 
             const res: LoginResponseDto = {
                 expiresIn,
-                token: jwt.sign({ userId: user.id } as IDataStoredInToken, secret, { expiresIn }),
+                token: jwt.sign({ userId: user.id, userEmail: user.email } as IDataStoredInToken, secret, { expiresIn }),
             }
 
             response.status(201).json(res);
