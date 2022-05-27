@@ -518,7 +518,6 @@ export default class AnnouncementController {
          throw new AnnouncementNotFoundException(announcementId)
        }
 
-       console.log('-------------- ', success);
        if(success) {
          await this.mailer.sendMail(annoucement.client.email, "You have paid for offer,", "xdddd")
          await this.mailer.sendMail(annoucement.chosenOffer.freelancer.email, "Your offer has been chosen", "xdddd");
