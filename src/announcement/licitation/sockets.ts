@@ -34,10 +34,12 @@ export class ServerSocket {
                 const token = socket.handshake.query.token as string;
 
                 const { userId } = jwt.decode(token, {}) as jwt.JwtPayload;
-                const isMyAnnouncement = await this.isMyAnnouncement(userId, announcementId)
+                const isMyAnnouncement = await this.isMyAnnouncement(userId, announcementId);
+                const isAnnouncementActive = await this.isActive(announcementId);
 
                 socket.emit("offers", await this.getOffers(announcementId));
                 socket.emit("owner",  {isOwner: isMyAnnouncement})
+                socket.emit("active",  {isActive: isAnnouncementActive})
                 console.log("Room", announcementId);
                 socket.join(announcementId);
                 this.handleOffer(socket);
@@ -48,6 +50,15 @@ export class ServerSocket {
             socket.emit("error", error);
         }
         });
+    }
+
+    private async isActive(announcementId: string) {
+        const announcement: Announcement | null = await announcementRepository.findOne({
+            where: {
+                id: announcementId,
+            }
+        });
+        return announcement !== null ? announcement.isActive : false
     }
 
     private async getOffers(announcementId: string) {
@@ -71,7 +82,6 @@ export class ServerSocket {
 
     public handleOffer(socket: Socket) {
         socket.on("addOffer", async (offer: OfferRequest) => {
-            console.log("New offer");
             try {
                 const newOffer: Offer = await this.addNewOffer(offer);
                 this.io.to(offer.announcementId).emit("offer", newOffer);
@@ -154,7 +164,7 @@ export class ServerSocket {
     }
 
     public acceptOffer(socket: Socket, announcementId: string) {
-        socket.on("acceptOffer", async (offerId) => {
+        socket.on("acceptOffer", async ({ offerId }) => {
         const announcement: Announcement | null = await announcementRepository.findOne({
             where: {
                 id: announcementId,
@@ -177,8 +187,10 @@ export class ServerSocket {
 
         announcement.chosenOffer = offer;
         offer.xd = announcement;
+        announcement.isActive = false;
         await announcementRepository.save(announcement);
         await offerRepository.save(offer);
+        this.io.to(announcementId).emit("active", {isActive: false});
 
         return true;
     });        
