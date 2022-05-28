@@ -190,6 +190,11 @@ export class ServerSocket {
         announcement.isActive = false;
         await announcementRepository.save(announcement);
         await offerRepository.save(offer);
+
+        socket.emit("offerAccepted", {
+            announcementId: announcementId
+        });
+
         this.io.to(announcementId).emit("active", {isActive: false});
 
         return true;

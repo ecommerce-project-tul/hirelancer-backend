@@ -491,8 +491,8 @@ export default class AnnouncementController {
               },
             ],
             mode: 'payment',
-            success_url: `http://localhost:4000/announcement/${annoucement.id}/mail?success=true`,
-            cancel_url:`http://localhost:4000/payment?success=false`,
+            success_url: `http://localhost:4000/announcement/${annoucement.id}/checkout/mail?success=true`,
+            cancel_url:  `http://localhost:4000/announcement/${annoucement.id}/checkout/mail?success=false`,
           });
 
         return response.redirect(303, session.url);
@@ -519,11 +519,11 @@ export default class AnnouncementController {
        }
 
        if(success) {
-         await this.mailer.sendMail(annoucement.client.email, "You have paid for offer,", "xdddd")
-         await this.mailer.sendMail(annoucement.chosenOffer.freelancer.email, "Your offer has been chosen", "xdddd");
+         await this.mailer.sendMail(annoucement.client.email, "[Hirelancer] Potwierdzenie płatności", `Dokonałeś płatność za ogłoszenie ${annoucement.title}`)
+         await this.mailer.sendMail(annoucement.chosenOffer.freelancer.email, "[Hirelancer] Twoja oferta została wybrana", `Twoja oferta w ogłoszeniu ${annoucement.title} została wybrana`);
        } 
 
-      return response.status(200).json(success)
+      return response.redirect(303, `http://localhost:3000/payment-success`);
     } catch (error) {
       next(error)
     }
