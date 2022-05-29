@@ -60,7 +60,12 @@ export default class UserController {
     private async getUserByEmail(request: Request, response: Response, next: NextFunction) {
         try {
             const { email } = request.params;
-            const user = await userRepository.findOneBy({email})
+            const user = await userRepository.findOne({
+                where: {
+                    email,
+                },
+                relations: ["announcements", "reviews"]
+            })
             response.status(200).json(user)
         } catch (error) {
             next(error);

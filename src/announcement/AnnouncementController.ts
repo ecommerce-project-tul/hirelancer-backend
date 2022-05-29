@@ -495,7 +495,8 @@ export default class AnnouncementController {
             cancel_url:  `http://localhost:4000/announcement/${annoucement.id}/checkout/mail?success=false`,
           });
 
-        return response.redirect(303, session.url);
+        return response.status(200).send({url: session.url});
+        // return response.redirect(303, session.url);
     } catch (error) {
         next(error)
     }

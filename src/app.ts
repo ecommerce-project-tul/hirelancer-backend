@@ -13,6 +13,7 @@ import cors from 'cors';
 import { ServerSocket } from './announcement/licitation/sockets';
 import http from 'http';
 import Mailer from './mailer';
+import UploadController from './upload/UploadController';
 
 dotenv.config();
 const app = express()
@@ -36,15 +37,18 @@ app.set("view engine", 'ejs')
 app.use( cors({
     origin: ["http://localhost:3000", "https://checkout.stripe.com"],
   }));
+
 app.use(logger("dev"))
 app.use(express.json());
 app.use(express.urlencoded({extended: false}))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
 app.use("/", new AuthController().router);
 app.use("/", new UserController().router);
 app.use("/", new AnnouncementController(mailer).router);
+app.use("/", new UploadController().router);
 app.use(errorMiddleware)
 
 const PORT = process.env.PORT || 4000;
