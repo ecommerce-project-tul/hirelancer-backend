@@ -466,7 +466,7 @@ export default class AnnouncementController {
         }
 
         const stripe = new Stripe(
-            "sk_test_51L404uLOSk9Raelfc5jEGkFxhmqjQUwMuq1eRq09HUqymwSwDAMXR1CsQ8sJNGtL1eqHOMg5wy3WyUFdyJhJ3mXd00wsT5lsyZ", 
+            process.env.STRPIE_TOKEN, 
             {
                 apiVersion: '2020-08-27',
             }
