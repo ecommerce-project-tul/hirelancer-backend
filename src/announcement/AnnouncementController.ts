@@ -33,7 +33,6 @@ export default class AnnouncementController {
   public router: Router = Router();
 
   constructor(mailer: Mailer) {
-    debugger;
     this.mailer = mailer;
     this.initializeRoutes();
   }
